@@ -1,6 +1,7 @@
 import os
 from flask import Flask, request, abort, g
 import psycopg2
+from psycopg2.extras import DictCursor
 
 from linebot import (
     LineBotApi, WebhookHandler
@@ -11,8 +12,6 @@ from linebot.exceptions import (
 from linebot.models import (
     MessageEvent, TextMessage, TextSendMessage,
 )
-
-from models import db, UserMessage
 
 app = Flask(__name__)
 
@@ -26,14 +25,12 @@ handler = WebhookHandler(YOUR_CHANNEL_SECRET)
 # 環境変数から PostgreSQL の URI を取得
 DATABASE_URL = os.environ.get("HEROKU_POSTGRESQL_BRONZE_URL")
 
-app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db.init_app(app)
-
-
 @app.route("/")
 def hello_world():
     return "hello world!"
+
+def get_connection():
+    return psycopg2.connect(DATABASE_URL, sslmode='require')
 
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -61,9 +58,6 @@ def handle_message(event):
             event.reply_token,
             TextSendMessage(text='ok'))
     elif msg.text == 'dbset':
-        new_message = UserMessage(user_id=user_id, message=msg.text)
-        db.session.add(new_message)
-        db.session.commit()
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text='ok'))
