@@ -22,26 +22,26 @@ line_bot_api = LineBotApi(YOUR_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(YOUR_CHANNEL_SECRET)
 
 # 環境変数から PostgreSQL の URI を取得
-#DATABASE_URL = os.environ.get("DATABASE_URL")
+DATABASE_URL = os.environ.get("HEROKU_POSTGRESQL_BRONZE_URL")
 
 
-#def get_pg_conn():
-#    """ PostgreSQL へ接続 """
-#    if not hasattr(g, "pg_conn"):
-#        g.pg_conn = psycopg2.connect(DATABASE_URL)
-#    return g.pg_conn
-#
-#
-#@app.teardown_appcontext
-#def close_pg_conn(error):
-#    """ エラーが発生したら PostgreSQL への接続を閉じる """
-#    if hasattr(g, "pg_conn"):
-#        g.pg_conn.close()
+def get_pg_conn():
+    """ PostgreSQL へ接続 """
+    if not hasattr(g, "pg_conn"):
+        g.pg_conn = psycopg2.connect(DATABASE_URL)
+    return g.pg_conn
+
+conn = get_pg_conn()
+cursor = conn.cursor()
+
+@app.teardown_appcontext
+def close_pg_conn(error):
+    """ エラーが発生したら PostgreSQL への接続を閉じる """
+    if hasattr(g, "pg_conn"):
+        g.pg_conn.close()
 
 @app.route("/")
 def hello_world():
-    #conn = get_pg_conn()
-    #cursor = conn.cursor()
     return "hello world!"
 
 @app.route("/callback", methods=['POST'])
@@ -65,6 +65,12 @@ def callback():
 def handle_message(event):
     msg = event.message
     if msg.text == 'test':
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text='ok'))
+    elif msg.text == 'dbset':
+        sql = "INSERT INTO groups (gid, uranai) VALUES (%s, %s)"
+        cursor.execute(sql, (msg.group_id,False))
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text='ok'))
