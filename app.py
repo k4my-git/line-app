@@ -22,26 +22,26 @@ line_bot_api = LineBotApi(YOUR_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(YOUR_CHANNEL_SECRET)
 
 # 環境変数から PostgreSQL の URI を取得
-DATABASE_URL = os.environ.get("DATABASE_URL")
+#DATABASE_URL = os.environ.get("DATABASE_URL")
 
 
-def get_pg_conn():
-    """ PostgreSQL へ接続 """
-    if not hasattr(g, "pg_conn"):
-        g.pg_conn = psycopg2.connect(DATABASE_URL)
-    return g.pg_conn
-
-
-@app.teardown_appcontext
-def close_pg_conn(error):
-    """ エラーが発生したら PostgreSQL への接続を閉じる """
-    if hasattr(g, "pg_conn"):
-        g.pg_conn.close()
+#def get_pg_conn():
+#    """ PostgreSQL へ接続 """
+#    if not hasattr(g, "pg_conn"):
+#        g.pg_conn = psycopg2.connect(DATABASE_URL)
+#    return g.pg_conn
+#
+#
+#@app.teardown_appcontext
+#def close_pg_conn(error):
+#    """ エラーが発生したら PostgreSQL への接続を閉じる """
+#    if hasattr(g, "pg_conn"):
+#        g.pg_conn.close()
 
 @app.route("/")
 def hello_world():
-    conn = get_pg_conn()
-    cursor = conn.cursor()
+    #conn = get_pg_conn()
+    #cursor = conn.cursor()
     return "hello world!"
 
 @app.route("/callback", methods=['POST'])
