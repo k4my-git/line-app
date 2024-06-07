@@ -12,6 +12,8 @@ from linebot.models import (
     MessageEvent, TextMessage, TextSendMessage,
 )
 
+from models import db, UserMessage
+
 app = Flask(__name__)
 
 #環境変数取得
@@ -24,21 +26,10 @@ handler = WebhookHandler(YOUR_CHANNEL_SECRET)
 # 環境変数から PostgreSQL の URI を取得
 DATABASE_URL = os.environ.get("HEROKU_POSTGRESQL_BRONZE_URL")
 
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db.init_app(app)
 
-def get_pg_conn():
-    """ PostgreSQL へ接続 """
-    if not hasattr(g, "pg_conn"):
-        g.pg_conn = psycopg2.connect(DATABASE_URL)
-    return g.pg_conn
-
-conn = get_pg_conn()
-cursor = conn.cursor()
-
-@app.teardown_appcontext
-def close_pg_conn(error):
-    """ エラーが発生したら PostgreSQL への接続を閉じる """
-    if hasattr(g, "pg_conn"):
-        g.pg_conn.close()
 
 @app.route("/")
 def hello_world():
@@ -64,13 +55,15 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     msg = event.message
+    user_id = event.source.user_id
     if msg.text == 'test':
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text='ok'))
     elif msg.text == 'dbset':
-        sql = "INSERT INTO groups (gid, uranai) VALUES (%s, %s)"
-        cursor.execute(sql, (msg.group_id,False))
+        new_message = UserMessage(user_id=user_id, message=msg.text)
+        db.session.add(new_message)
+        db.session.commit()
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text='ok'))
