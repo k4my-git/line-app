@@ -72,7 +72,8 @@ def handle_message(event):
             TextSendMessage(text='ok'))
 
 if __name__ == "__main__":
-    schedule.every().day.at("15:30").do(send_uranai)
+    schedule.every().day.at("15:35").do(send_uranai)
     thread1 = threading.Thread(target=schedule_loop)
+    thread1.start()
     port = int(os.getenv("PORT"))
     app.run(host="0.0.0.0", port=port)
