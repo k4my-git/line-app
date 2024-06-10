@@ -53,10 +53,7 @@ def handle_message(event):
             event.reply_token,
             TextSendMessage(text='ok'))
     elif msg.text == 'dbset':
-        tabale = 'groups'
-        column = f'(gid, uranai)'
-        values = f'({group_id}, False)'
-        database.insert_values(tabale,column,values)
+        database.insert_values(group_id,False)
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text='ok'))

@@ -8,8 +8,8 @@ DATABASE_URL = os.environ.get("HEROKU_POSTGRESQL_BRONZE_URL")
 def get_connection():
     return psycopg2.connect(DATABASE_URL, sslmode='require')
 
-def insert_values(table,column,values):
+def groups_insert_values(gid, uranai):
     with get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute(f'INSERT INTO {table} {column} VALUES {values}')
+            cur.execute(f'INSERT INTO groups (gid, uranai) VALUES ({gid}, {uranai})')
         conn.commit()
