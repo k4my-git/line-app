@@ -46,21 +46,9 @@ def callback():
 
     return 'OK'
 
-def send_uranai():
-    print('schedule')
-    to = 'Cd4be544e806ee37f624dfe92d68d6267'
-    message = TextSendMessage(text='uranai')
-    line_bot_api.push_message(to, message)
-
-def schedule_loop():
-    while True:
-        schedule.run_pending()
-        time.sleep(5)  # 60秒間隔でチェック
-
-schedule.every().day.at("15:50").do(send_uranai)
-
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
+    print(event)
     msg = event.message
     user_id = event.source.user_id
     group_id = event.source.group_id
@@ -73,6 +61,19 @@ def handle_message(event):
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text='ok'))
+
+def send_uranai():
+    print('schedule')
+    to = 'Cd4be544e806ee37f624dfe92d68d6267'
+    message = TextSendMessage(text='uranai')
+    line_bot_api.push_message(to, message)
+
+schedule.every().day.at("16:15").do(send_uranai)
+
+def schedule_loop():
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
 
 if __name__ == "__main__":
     thread1 = threading.Thread(target=schedule_loop)
