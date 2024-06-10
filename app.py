@@ -1,4 +1,7 @@
 import os
+import time
+import threading
+import schedule
 from flask import Flask, request, abort, g
 from models import database
 
@@ -43,6 +46,16 @@ def callback():
 
     return 'OK'
 
+def send_uranai():
+    to = 'Cd4be544e806ee37f624dfe92d68d6267'
+    message = TextSendMessage(text='uranai')
+    line_bot_api.push_message(to, message)
+
+def schedule_loop():
+    while True:
+        schedule.run_pending()
+        time.sleep(60)  # 60秒間隔でチェック
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     msg = event.message
@@ -59,6 +72,7 @@ def handle_message(event):
             TextSendMessage(text='ok'))
 
 if __name__ == "__main__":
-#    app.run()
+    schedule.every().day.at("15:30").do(send_uranai)
+    thread1 = threading.Thread(target=schedule_loop)
     port = int(os.getenv("PORT"))
     app.run(host="0.0.0.0", port=port)
