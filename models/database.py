@@ -21,10 +21,10 @@ def init_db():
         with conn.cursor() as cur:
             cur.execute('''
                 CREATE TABLE IF NOT EXISTS games (
-                    user_id text not null constraint games_pk,
+                    user_id text not null,
                     board text,
                     turn text,
-                    PRIMARY KEY(user_id)
+                    constraint games_pk PRIMARY KEY(user_id)
                 )
             ''')
         conn.commit()
