@@ -1,6 +1,6 @@
 import os
 from flask import Flask, request, abort, g
-import database
+from models import database
 
 from linebot import (
     LineBotApi, WebhookHandler
