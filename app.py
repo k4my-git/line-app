@@ -1,7 +1,7 @@
 import os
 import time
 import threading
-import schedule
+from datetime import datetime
 from flask import Flask, request, abort, g
 from models import database
 
@@ -68,11 +68,13 @@ def send_uranai():
     message = TextSendMessage(text='uranai')
     line_bot_api.push_message(to, message)
 
-schedule.every().day.at("16:15").do(send_uranai)
 
 def schedule_loop():
     while True:
-        schedule.run_pending()
+        now = datetime.now()
+        current_hour = now.time().hour
+        if current_hour == 17:
+            send_uranai()
         time.sleep(1)
 
 if __name__ == "__main__":
