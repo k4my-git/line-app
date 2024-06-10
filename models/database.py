@@ -21,9 +21,10 @@ def init_db():
         with conn.cursor() as cur:
             cur.execute('''
                 CREATE TABLE IF NOT EXISTS games (
-                    user_id TEXT PRIMARY KEY,
+                    user_id TEXT not null constraint games_pk,
                     board TEXT,
-                    turn TEXT
+                    turn TEXT,
+                    PRIMARY KEY(user_id)
                 )
             ''')
         conn.commit()
@@ -31,20 +32,20 @@ def init_db():
 def save_game(user_id, board, turn):
     with get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute('REPLACE INTO games (user_id, board, turn) VALUES (?, ?, ?)', (user_id, json.dumps(board), turn))
+            cur.execute('INSERT INTO games (user_id, board, turn) VALUES (%s, %s, %s) on conflict on constraint games_pk do update set (user_id, board, turn) = (%s, %s, %s)', (user_id, json.dumps(board), turn, user_id, json.dumps(board), turn))
         conn.commit()
 
 def load_game(user_id):
     with get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute('SELECT board, turn FROM games WHERE user_id = ?', (user_id,))
+            cur.execute('SELECT board, turn FROM games WHERE user_id = %s', (user_id,))
             row = cur.fetchone()
-    if row:
-        return json.loads(row[0]), row[1]
-    return None, None
+        if row:
+            return json.loads(row[0]), row[1]
+        return None, None
 
 def delete_game(user_id):
     with get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute('DELETE FROM games WHERE user_id = ?', (user_id,))
+            cur.execute('DELETE FROM games WHERE user_id = %s', (user_id,))
         conn.commit()
