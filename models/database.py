@@ -11,5 +11,5 @@ def get_connection():
 def groups_insert_values(gid, uranai):
     with get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute(f'INSERT INTO groups (gid, uranai) VALUES ({gid}, {uranai})')
+            cur.execute(f'INSERT INTO groups (gid, uranai) VALUES (%s, %s)', (gid,uranai))
         conn.commit()
