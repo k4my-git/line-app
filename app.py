@@ -1,7 +1,6 @@
 import os
 from flask import Flask, request, abort, g
-import psycopg2
-from psycopg2.extras import DictCursor
+import database
 
 from linebot import (
     LineBotApi, WebhookHandler
@@ -22,15 +21,10 @@ YOUR_CHANNEL_SECRET = os.environ["YOUR_CHANNEL_SECRET"]
 line_bot_api = LineBotApi(YOUR_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(YOUR_CHANNEL_SECRET)
 
-# 環境変数から PostgreSQL の URI を取得
-DATABASE_URL = os.environ.get("HEROKU_POSTGRESQL_BRONZE_URL")
 
 @app.route("/")
 def hello_world():
     return "hello world!"
-
-def get_connection():
-    return psycopg2.connect(DATABASE_URL, sslmode='require')
 
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -53,11 +47,16 @@ def callback():
 def handle_message(event):
     msg = event.message
     user_id = event.source.user_id
+    group_id = event.source.group_id
     if msg.text == 'test':
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text='ok'))
     elif msg.text == 'dbset':
+        tabale = 'groups'
+        column = f'(gid, uranai)'
+        values = f'({group_id}, False)'
+        database.insert_values(tabale,column,values)
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text='ok'))
