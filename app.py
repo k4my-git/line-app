@@ -75,12 +75,13 @@ def schedule_loop():
         now = datetime.now(pytz.timezone('Asia/Tokyo'))
         current_time = now.strftime("%H:%M:%S")
         print(current_time)
-        if "17:10:00" <= current_time <= "17:10:1":
+        if "17:25:00" <= current_time <= "17:25:10":
             send_uranai()
         time.sleep(1)
 
 if __name__ == "__main__":
     thread1 = threading.Thread(target=schedule_loop)
+    thread1.daemon = True
     thread1.start()
     print("Thread has started.")
     port = int(os.getenv("PORT", 5000))
