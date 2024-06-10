@@ -1,8 +1,4 @@
 import os
-import time
-import pytz
-import threading
-from datetime import datetime
 from flask import Flask, request, abort, g
 from models import database
 
@@ -63,26 +59,6 @@ def handle_message(event):
             event.reply_token,
             TextSendMessage(text='ok'))
 
-def send_uranai():
-    print('schedule')
-    to = 'Cd4be544e806ee37f624dfe92d68d6267'
-    message = TextSendMessage(text='uranai')
-    line_bot_api.push_message(to, message)
-
-
-def schedule_loop():
-    while True:
-        now = datetime.now(pytz.timezone('Asia/Tokyo'))
-        current_time = now.strftime("%H:%M:%S")
-        print(current_time)
-        if "17:25:00" <= current_time <= "17:25:10":
-            send_uranai()
-        time.sleep(1)
-
 if __name__ == "__main__":
-    thread1 = threading.Thread(target=schedule_loop)
-    thread1.daemon = True
-    thread1.start()
-    print("Thread has started.")
     port = int(os.getenv("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
