@@ -74,7 +74,7 @@ def schedule_loop():
     while True:
         now = datetime.now(pytz.timezone('Asia/Tokyo'))
         current_time = now.strftime("%H:%M:%S")
-        if current_time == '16:45:00':
+        if current_time == '16:46:00':
             send_uranai()
         time.sleep(1)
 
