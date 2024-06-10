@@ -1,5 +1,6 @@
 import os
 import time
+import pytz
 import threading
 from datetime import datetime
 from flask import Flask, request, abort, g
@@ -71,9 +72,9 @@ def send_uranai():
 
 def schedule_loop():
     while True:
-        now = datetime.now()
-        current_hour = now.time().hour
-        if current_hour == 17:
+        now = datetime.now(pytz.timezone('Asia/Tokyo'))
+        current_time = now.strftime("%H:%M:%S")
+        if current_time == '16:45:00':
             send_uranai()
         time.sleep(1)
 
