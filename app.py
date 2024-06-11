@@ -1,4 +1,5 @@
 import os
+import requests
 from flask import Flask, request, abort, g
 from models import database
 import othello
@@ -25,6 +26,8 @@ handler = WebhookHandler(YOUR_CHANNEL_SECRET)
 # othelloデータベースの初期化
 database.init_db()
 
+othello_chat_id = None
+
 @app.route("/")
 def hello_world():
     return "hello world!"
@@ -46,6 +49,16 @@ def callback():
 
     return 'OK'
 
+def delete_message(message_id):
+    url = f'https://api.line.me/v2/bot/message/{message_id}/delete'
+
+    headers = {
+        'Authorization': f'Bearer {YOUR_CHANNEL_ACCESS_TOKEN}'
+    }
+
+    response = requests.delete(url, headers=headers)
+    return response
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     print(event)
@@ -56,6 +69,11 @@ def handle_message(event):
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text='ok'))
+    if msg.text == 'id':
+        data = line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text='ok'))
+        print(data)
     elif msg.text == 'dbset':
         database.groups_insert_values(group_id,False)
         line_bot_api.reply_message(
