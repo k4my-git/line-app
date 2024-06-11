@@ -37,7 +37,7 @@ def save_game(user_id, board, turn):
             cur.execute('''
                 INSERT INTO games (user_id, B_user_id, W_user_id, board, turn) VALUES (%s, %s, %s, %s, %s)
                 ON CONFLICT (user_id) DO UPDATE
-                SET board = EXCLUDED.board, turn = EXCLUDED.turn
+                SET B_user_id = EXCLUDED.B_user_id, W_user_id = EXCLUDED.W_user_id, board = EXCLUDED.board, turn = EXCLUDED.turn
             ''', (user_id, json.dumps(board), turn))
         conn.commit()
 
