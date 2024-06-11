@@ -105,7 +105,7 @@ def handle_message(event):
             TextSendMessage(text='対戦相手をメンションしてください'))
 
     elif msg.text == "continue":
-        board, turn = database.load_game(user_id)
+        board, turn = database.load_game(group_id)
         if board:
             flex_message = FlexSendMessage(alt_text="オセロ", contents=othello.board_to_flex(board))
             line_bot_api.reply_message(event.reply_token, flex_message)
@@ -116,7 +116,15 @@ def handle_message(event):
 @handler.add(PostbackEvent)
 def handle_postback(event):
     group_id = event.source.group_id
+    user_id = event.source.user_id
     b_user, w_user, board, turn = database.load_game(group_id)
+
+    if turn == 'B':
+        if user_id != b_user:
+            return
+    else:
+        if user_id != w_user:
+            return
 
     if not board:
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="ゲームを開始するには「start」と入力してください。"))
