@@ -77,10 +77,6 @@ def handle_message(event):
             database.save_game(group_id, user_id, user.user_id, board, 'B')
             flex_message = FlexSendMessage(alt_text="オセロ", contents=othello.board_to_flex(board))
             line_bot_api.reply_message(event.reply_token, flex_message)
-
-            line_bot_api.reply_message(
-                event.reply_token,
-            TextSendMessage(text='黒からスタートです'))
     elif msg.text == 'test':
         line_bot_api.reply_message(
             event.reply_token,
