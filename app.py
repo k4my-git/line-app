@@ -67,9 +67,9 @@ def handle_message(event):
     user_id = event.source.user_id
     group_id = event.source.group_id
     if event.message.mention is not None:
-        print('ok')
+        print(othello_start_check)
         if group_id in othello_start_check:
-            print(othello_start_check)
+            print('ok2')
             othello_start_check.remove(group_id)
             mentioned_users = event.message.mention.mentionees
             user = mentioned_users[0]
