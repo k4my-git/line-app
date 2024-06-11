@@ -73,7 +73,7 @@ def board_to_flex(board):
             if cell == 'B':
                 color = '#000000'
             elif cell == 'W':
-                color = '#f0f8ff'
+                color = '#dcdcdc'
             else:
                 color = '#008000'  # 空のセルは緑色
             row_contents.append({
