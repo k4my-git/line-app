@@ -32,7 +32,11 @@ def init_db():
 def save_game(user_id, board, turn):
     with get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute('INSERT INTO games (user_id, board, turn) VALUES (%s, %s, %s) on conflict on constraint games_pk do update set (user_id, board, turn) = (%s, %s, %s)', (user_id, json.dumps(board), turn, user_id, json.dumps(board), turn))
+            cur.execute('''
+                INSERT INTO games (user_id, board, turn) VALUES (%s, %s, %s)
+                ON CONFLICT (user_id) DO UPDATE
+                SET board = EXCLUDED.board, turn = EXCLUDED.turn
+            ''', (user_id, json.dumps(board), turn))
         conn.commit()
 
 def load_game(user_id):
