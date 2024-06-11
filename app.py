@@ -66,8 +66,6 @@ def handle_message(event):
     user_id = event.source.user_id
     group_id = event.source.group_id
     if 'mention' in msg:
-        if group_id != 'Cd4be544e806ee37f624dfe92d68d6267':
-            return
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text='メンション検知'))
@@ -75,7 +73,7 @@ def handle_message(event):
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text='ok'))
-    if msg.text == 'id':
+    elif msg.text == 'id':
         data = line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(text='ok'))
