@@ -21,10 +21,12 @@ def init_db():
         with conn.cursor() as cur:
             cur.execute('''
                 CREATE TABLE IF NOT EXISTS games (
-                    user_id text not null,
+                    group_id text not null,
+                    B_user_id text,
+                    W_user_id text,
                     board text,
                     turn text,
-                    constraint games_pk PRIMARY KEY(user_id)
+                    constraint games_pk PRIMARY KEY(group_id)
                 )
             ''')
         conn.commit()
@@ -33,23 +35,23 @@ def save_game(user_id, board, turn):
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute('''
-                INSERT INTO games (user_id, board, turn) VALUES (%s, %s, %s)
+                INSERT INTO games (user_id, B_user_id, W_user_id, board, turn) VALUES (%s, %s, %s, %s, %s)
                 ON CONFLICT (user_id) DO UPDATE
                 SET board = EXCLUDED.board, turn = EXCLUDED.turn
             ''', (user_id, json.dumps(board), turn))
         conn.commit()
 
-def load_game(user_id):
+def load_game(group_id):
     with get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute('SELECT board, turn FROM games WHERE user_id = %s', (user_id,))
+            cur.execute('SELECT B_user_id, W_user_id, board, turn FROM games WHERE group_id = %s', (group_id,))
             row = cur.fetchone()
         if row:
-            return json.loads(row[0]), row[1]
-        return None, None
+            return row[0], row[1], json.loads(row[2]), row[3]
+        return None, None, None, None
 
-def delete_game(user_id):
+def delete_game(group_id):
     with get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute('DELETE FROM games WHERE user_id = %s', (user_id,))
+            cur.execute('DELETE FROM games WHERE group_id = %s', (group_id,))
         conn.commit()

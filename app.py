@@ -27,6 +27,7 @@ handler = WebhookHandler(YOUR_CHANNEL_SECRET)
 database.init_db()
 
 othello_chat_id = None
+othello_start_check = []
 
 @app.route("/")
 def hello_world():
@@ -65,29 +66,41 @@ def handle_message(event):
     msg = event.message
     user_id = event.source.user_id
     group_id = event.source.group_id
-    if 'mention' in msg:
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text='メンション検知'))
-    if msg.text == 'test':
+    if event.message.mention is not None:
+        if group_id in othello_start_check:
+            othello_start_check.remove(group_id)
+            mentioned_users = event.message.mention.mentionees
+            user = mentioned_users[0]
+            board = othello.initial_board()
+            database.save_game(group_id, user_id, user.user_id, board, 'B')
+            flex_message = FlexSendMessage(alt_text="オセロ", contents=othello.board_to_flex(board))
+            line_bot_api.reply_message(event.reply_token, flex_message)
+
+            line_bot_api.reply_message(
+                event.reply_token,
+            TextSendMessage(text='黒からスタートです'))
+    elif msg.text == 'test':
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text='ok'))
-    elif msg.text == 'id':
-        data = line_bot_api.reply_message(
+    elif msg.text == 'Gid':
+        line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage(text='ok'))
-        print(data)
+                TextSendMessage(text=group_id))
+    elif msg.text == 'Mid':
+        line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text=user_id))
     elif msg.text == 'dbset':
         database.groups_insert_values(group_id,False)
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text='ok'))
     elif msg.text == "start":
-        board = othello.initial_board()
-        database.save_game(group_id, user_id, board, 'B')
-        flex_message = FlexSendMessage(alt_text="オセロ", contents=othello.board_to_flex(board))
-        line_bot_api.reply_message(event.reply_token, flex_message)
+        othello_start_check.append(group_id)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text='対戦相手をメンションしてください'))
 
     elif msg.text == "continue":
         board, turn = database.load_game(user_id)
@@ -100,8 +113,8 @@ def handle_message(event):
 # ポストバックイベントの処理
 @handler.add(PostbackEvent)
 def handle_postback(event):
-    user_id = event.source.user_id
-    board, turn = database.load_game(user_id)
+    group_id = event.source.group_id
+    b_user, w_user, board, turn = database.load_game(group_id)
 
     if not board:
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="ゲームを開始するには「start」と入力してください。"))
@@ -125,10 +138,10 @@ def handle_postback(event):
                 else:
                     result_message += "引き分けです"
                 line_bot_api.reply_message(event.reply_token, TextSendMessage(text=result_message))
-                database.delete_game(user_id)
+                database.delete_game(group_id)
             else:
                 turn = 'W' if turn == 'B' else 'B'
-                database.save_game(user_id, board, turn)
+                database.save_game(group_id, b_user, w_user, board, turn)
                 flex_message = FlexSendMessage(alt_text="オセロ", contents=othello.board_to_flex(board))
                 line_bot_api.reply_message(event.reply_token, flex_message)
         else:
