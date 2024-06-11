@@ -102,7 +102,7 @@ def handle_message(event):
         othello_start_check.append(group_id)
         line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(text='対戦相手をメンションしてください'))
+            TextSendMessage(text='オセロの対戦相手をメンションしてください\nあなたは黒、相手は白です\n先手は黒です'))
 
     elif msg.text == "continue":
         board, turn = database.load_game(group_id)
