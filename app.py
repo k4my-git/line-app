@@ -65,6 +65,12 @@ def handle_message(event):
     msg = event.message
     user_id = event.source.user_id
     group_id = event.source.group_id
+    if 'mention' in msg:
+        if group_id != 'Cd4be544e806ee37f624dfe92d68d6267':
+            return
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text='メンション検知'))
     if msg.text == 'test':
         line_bot_api.reply_message(
             event.reply_token,
@@ -81,7 +87,7 @@ def handle_message(event):
             TextSendMessage(text='ok'))
     elif msg.text == "start":
         board = othello.initial_board()
-        database.save_game(user_id, board, 'B')
+        database.save_game(group_id, user_id, board, 'B')
         flex_message = FlexSendMessage(alt_text="オセロ", contents=othello.board_to_flex(board))
         line_bot_api.reply_message(event.reply_token, flex_message)
 
