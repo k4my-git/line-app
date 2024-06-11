@@ -31,14 +31,14 @@ def init_db():
             ''')
         conn.commit()
 
-def save_game(user_id, board, turn):
+def save_game(user_id,b_user_id, w_user_id, board, turn):
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute('''
                 INSERT INTO games (user_id, B_user_id, W_user_id, board, turn) VALUES (%s, %s, %s, %s, %s)
                 ON CONFLICT (user_id) DO UPDATE
                 SET B_user_id = EXCLUDED.B_user_id, W_user_id = EXCLUDED.W_user_id, board = EXCLUDED.board, turn = EXCLUDED.turn
-            ''', (user_id, json.dumps(board), turn))
+            ''', (user_id, b_user_id, w_user_id, json.dumps(board), turn))
         conn.commit()
 
 def load_game(group_id):
