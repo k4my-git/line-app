@@ -60,6 +60,51 @@ def delete_message(message_id):
     response = requests.delete(url, headers=headers)
     return response
 
+def generate_horoscope_flex():
+    # ダミーデータを使用して星座占いランキングを生成
+    horoscope_data = [
+        {"rank": 1, "name": "牡羊座", "description": "今日は新しいことを始めるのに最適な日です！"},
+        {"rank": 2, "name": "牡牛座", "description": "友達との絆が深まる日です。"},
+        {"rank": 3, "name": "双子座", "description": "集中力が高まり、仕事が捗ります。"},
+        # ... 省略 ...
+        {"rank": 12, "name": "魚座", "description": "今日はリラックスして過ごしましょう。"}
+    ]
+
+    contents = []
+    for item in horoscope_data:
+        bubble = {
+            "type": "bubble",
+            "body": {
+                "type": "box",
+                "layout": "vertical",
+                "contents": [
+                    {
+                        "type": "text",
+                        "text": f"#{item['rank']} {item['name']}",
+                        "weight": "bold",
+                        "size": "xl"
+                    },
+                    {
+                        "type": "text",
+                        "text": item['description'],
+                        "margin": "md",
+                        "wrap": True
+                    }
+                ]
+            }
+        }
+        contents.append(bubble)
+
+    flex_message = FlexSendMessage(
+        alt_text="今日の星座占いランキング",
+        contents={
+            "type": "carousel",
+            "contents": contents
+        }
+    )
+
+    return flex_message
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     print(event)
@@ -107,6 +152,10 @@ def handle_message(event):
             line_bot_api.reply_message(event.reply_token, flex_message)
         else:
             line_bot_api.reply_message(event.reply_token, TextSendMessage(text="進行中のゲームがありません。「start」と入力してゲームを開始してください。"))
+    
+    elif msg.text.lower() in ['星座占い', '占い', 'horoscope']:
+        flex_message = generate_horoscope_flex()
+        line_bot_api.reply_message(event.reply_token, flex_message)
 
 # ポストバックイベントの処理
 @handler.add(PostbackEvent)
