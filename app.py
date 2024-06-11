@@ -87,7 +87,9 @@ def handle_postback(event):
 
     data = event.postback.data
     if data.startswith("move"):
-        _, row, col = map(int, data.split(","))
+        _, row, col = data.split(",")
+        row = int(row)
+        col = int(col)
         
         if othello.is_valid_move(board, row, col, turn):
             othello.place_stone(board, row, col, turn)
